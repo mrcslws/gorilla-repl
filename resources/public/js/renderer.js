@@ -18,11 +18,11 @@ var render = function (data, element, errorCallback) {
 
     // Attach a click event handler to each element for value copy and paste.
     $(".value", element).click(function (ed) {
-        if (ed.altKey) {
-            var value = $(this).attr('data-value');
-            eventBus.trigger("app:show-value", value);
-        }
-        return false;
+	if (ed.altKey) {
+	    var value = $(this).attr('data-value');
+	    eventBus.trigger("app:show-value", value);
+	}
+	return true;
     });
 };
 
@@ -30,14 +30,14 @@ var render = function (data, element, errorCallback) {
 var renderPart = function (data, callbackQueue, errorCallback) {
 
     switch (data.type) {
-        case "html":
-            return renderHTML(data, callbackQueue, errorCallback);
-        case "list-like":
-            return renderListLike(data, callbackQueue, errorCallback);
-        case "vega":
-            return renderVega(data, callbackQueue, errorCallback);
-        case "latex":
-            return renderLatex(data, callbackQueue, errorCallback);
+	case "html":
+	    return renderHTML(data, callbackQueue, errorCallback);
+	case "list-like":
+	    return renderListLike(data, callbackQueue, errorCallback);
+	case "vega":
+	    return renderVega(data, callbackQueue, errorCallback);
+	case "latex":
+	    return renderLatex(data, callbackQueue, errorCallback);
     }
 
     return "Unknown render type";
@@ -67,20 +67,20 @@ var renderVega = function (data, callbackQueue, errorCallback) {
     // great user experience. Here we patch the error handling function to re-route any generated message
     // to the segment.
     vg.error = function (msg) {
-        errorCallback("Vega error (js): " + msg);
+	errorCallback("Vega error (js): " + msg);
     };
 
     callbackQueue.push(function () {
-        vg.parse.spec(data.content, function (chart) {
-            try {
-                var element = $("#" + uuid).get()[0];
-                chart({el: element, renderer: 'svg'}).update();
-            } catch (e) {
-                // we'll end up here if vega throws an error. We try and route this error back to the
-                // segment so the user has an idea of what's going on.
-                errorCallback("Vega error (js): " + e.message);
-            }
-        });
+	vg.parse.spec(data.content, function (chart) {
+	    try {
+		var element = $("#" + uuid).get()[0];
+		chart({el: element, renderer: 'svg'}).update();
+	    } catch (e) {
+		// we'll end up here if vega throws an error. We try and route this error back to the
+		// segment so the user has an idea of what's going on.
+		errorCallback("Vega error (js): " + e.message);
+	    }
+	});
     });
 
     return wrapWithValue(data, "<span class='vega-span' id='" + uuid + "'></span>");
@@ -91,8 +91,8 @@ var renderLatex = function (data, callbackQueue, errorCallback) {
     var uuid = UUID.generate();
 
     callbackQueue.push(function () {
-        // MathJax might not be available.
-        if ("MathJax" in window) MathJax.Hub.Queue(["Typeset", MathJax.Hub, uuid]);
+	// MathJax might not be available.
+	if ("MathJax" in window) MathJax.Hub.Queue(["Typeset", MathJax.Hub, uuid]);
     });
 
     return wrapWithValue(data, "<span class='latex-span' id='" + uuid + "'>@@" + data.content + "@@</span>");
