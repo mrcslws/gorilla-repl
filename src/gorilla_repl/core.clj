@@ -98,7 +98,8 @@
     ;; first startup nREPL
     (nrepl/start-and-connect nrepl-requested-port)
     ;; and then the webserver
-    (let [s (server/run-server #'app-routes {:port webapp-requested-port :join? false :ip ip})
+    (let [s (server/run-server #'app-routes {:port webapp-requested-port :join? false :ip ip
+                                             :max-body java.lang.Integer/MAX_VALUE})
           webapp-port (:local-port (meta s))]
       (spit (doto (io/file ".gorilla-port") .deleteOnExit) webapp-port)
       (println (str "Running at http://" ip ":" webapp-port "/worksheet.html ."))
