@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="css/viewer.css"/>
 
     <script type="text/javascript"
-            src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_SVG-full.js&delayStartupUntil=configured"></script>
+	    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_SVG-full.js&delayStartupUntil=configured"></script>
     <script type="text/javascript" src="jslib/marked/marked.min.js"></script>
     <script type="text/javascript" src="jslib/codemirror-4.5/lib/codemirror.js"></script>
     <script type="text/javascript" src="jslib/codemirror-4.5/addon/runmode/runmode.js"></script>
@@ -42,6 +42,9 @@
     <script type="text/javascript" src="js-viewer/bitbucket.js"></script>
     <script type="text/javascript" src="js-viewer/main-viewer.js"></script>
 
+    <script type="text/javascript" src="ext/injectIntoGorilla.js"></script>
+    <script type="text/javascript" src="cnotebook.js"></script>
+
     <title data-bind="text: title">Gorilla REPL viewer</title>
 </head>
 <body>
@@ -49,19 +52,19 @@
 <!-- The page stub -->
 <div class="header">
     <div class="header-left">Made with <a href="http://clojure.org" target="_blank">Clojure</a> and
-        <a href="http://gorilla-repl.org" target="_blank">Gorilla REPL</a></div>
+	<a href="http://gorilla-repl.org" target="_blank">Gorilla REPL</a></div>
     <div class="header-right">
-        <a href="#" data-bind="click: showCopyBox">View this worksheet on <span data-bind="text: host"></span></a>
+	<a href="#" data-bind="click: showCopyBox">View this worksheet on <span data-bind="text: host"></span></a>
     </div>
 </div>
 
 
 <div id="contents" data-bind="css: {veiled: copyBoxVisible}">
     <div class="segment container-segment">
-        <div class="container-children">
-            <div data-bind="template: {name: 'segment-template', foreach: worksheet().segments()}">
-            </div>
-        </div>
+	<div class="container-children">
+	    <div data-bind="template: {name: 'segment-template', foreach: worksheet().segments()}">
+	    </div>
+	</div>
     </div>
 </div>
 
@@ -75,26 +78,26 @@
 <script type="text/html" id="code-segment-template">
     <div class="segment code">
 
-        <div class="segment-main">
-            <pre class="static-code clojure"><code data-bind="text: contents"></code></pre>
-        </div>
-        <div class="error-text" data-bind="text: errorText, visible: errorText() !== ''"></div>
-        <div class="console-text" data-bind="visible: consoleText() !== ''">
-            <pre><code data-bind="html: consoleText"></code></pre>
-        </div>
-        <div class="output"
-             data-bind="visible: (output() != ''), outputViewer: output, segmentID: id">
-        </div>
-        <div class="segment-footer"></div>
+	<div class="segment-main">
+	    <pre class="static-code clojure"><code data-bind="text: contents"></code></pre>
+	</div>
+	<div class="error-text" data-bind="text: errorText, visible: errorText() !== ''"></div>
+	<div class="console-text" data-bind="visible: consoleText() !== ''">
+	    <pre><code data-bind="html: consoleText"></code></pre>
+	</div>
+	<div class="output"
+	     data-bind="visible: (output() != ''), outputViewer: output, segmentID: id">
+	</div>
+	<div class="segment-footer"></div>
     </div>
 </script>
 
 <script type="text/html" id="free-segment-template">
     <div class="segment free">
-        <div class="segment-main">
-            <div class="free-preview" data-bind="mathJaxViewer: renderedContent"></div>
-        </div>
-        <div class="segment-footer"></div>
+	<div class="segment-main">
+	    <div class="free-preview" data-bind="mathJaxViewer: renderedContent"></div>
+	</div>
+	<div class="segment-footer"></div>
     </div>
 </script>
 
@@ -102,37 +105,37 @@
 <div class="copyBox" style="display: none" data-bind="visible: copyBoxVisible">
     <p>This code can be found on <span data-bind="text: host"></span> here:</p>
     <div data-bind="visible: (!(source().toLowerCase() === 'gist'))">
-        <a data-bind="attr: {href: sourceURL}, text: sourceURL" target="_blank"></a>
-        </div>
+	<a data-bind="attr: {href: sourceURL}, text: sourceURL" target="_blank"></a>
+	</div>
     <div data-bind="visible: (source().toLowerCase() === 'gist')">
-        <a data-bind="attr: {href: sourceURL}, text: sourceURL" target="_blank"></a>
+	<a data-bind="attr: {href: sourceURL}, text: sourceURL" target="_blank"></a>
     </div>
 
     <p>You can run and edit your own copy of this worksheet in under five minutes, even if you've never used
     Clojure or Gorilla REPL before:</p>
     <div data-bind="visible: (!(source().toLowerCase() === 'gist'))">
     <ul>
-        <li>If you don't yet have Leiningen installed, then follow the instructions
-            <a href="http://leiningen.org/#install" target="_blank">here</a>. It only takes a couple of minutes.</li>
-        <li>Clone the <span data-bind="text: host"></span>  project that contains this worksheet:
-            <a data-bind="attr: {href: sourceURL}, text: sourceURL" target="_blank"></a>.</li>
-        <li>Open a terminal in the project directory and run "lein gorilla".</li>
-        <li>Open the load dialog by pressing "alt+g alt+l" ("ctrl+g ctrl+l" on Mac).</li>
-        <li>Enter the path "<span data-bind="text: filename"></span>" into the dialog.</li>
+	<li>If you don't yet have Leiningen installed, then follow the instructions
+	    <a href="http://leiningen.org/#install" target="_blank">here</a>. It only takes a couple of minutes.</li>
+	<li>Clone the <span data-bind="text: host"></span>  project that contains this worksheet:
+	    <a data-bind="attr: {href: sourceURL}, text: sourceURL" target="_blank"></a>.</li>
+	<li>Open a terminal in the project directory and run "lein gorilla".</li>
+	<li>Open the load dialog by pressing "alt+g alt+l" ("ctrl+g ctrl+l" on Mac).</li>
+	<li>Enter the path "<span data-bind="text: filename"></span>" into the dialog.</li>
     </ul>
     </div>
     <div data-bind="visible: (source().toLowerCase() === 'gist')">
-        <ul>
-            <li>If you don't have Gorilla REPL installed yet, then follow the instructions
-                <a href="http://gorilla-repl.org/start.html" target="_blank">here</a>.
-            </li>
-            <li>Download the worksheet from the GitHub gist:
-                <a data-bind="attr: {href: sourceURL}, text: sourceURL" target="_blank"></a>.</li>
-            <li>Assuming you've added the Gorilla plugin to your "profiles.clj", as described in the getting started
-                instructions from step one, then run "lein gorilla"</li>
-            <li>Open the load dialog by pressing "alt+g alt+l" ("ctrl+g ctrl+l" on Mac).</li>
-            <li>Enter the path to the file you saved in step two.</li>
-        </ul>
+	<ul>
+	    <li>If you don't have Gorilla REPL installed yet, then follow the instructions
+		<a href="http://gorilla-repl.org/start.html" target="_blank">here</a>.
+	    </li>
+	    <li>Download the worksheet from the GitHub gist:
+		<a data-bind="attr: {href: sourceURL}, text: sourceURL" target="_blank"></a>.</li>
+	    <li>Assuming you've added the Gorilla plugin to your "profiles.clj", as described in the getting started
+		instructions from step one, then run "lein gorilla"</li>
+	    <li>Open the load dialog by pressing "alt+g alt+l" ("ctrl+g ctrl+l" on Mac).</li>
+	    <li>Enter the path to the file you saved in step two.</li>
+	</ul>
     </div>
     <p>That's it, you're done. Have fun!</p>
     <div class="button" data-bind="click: hideCopyBox">OK, got it</div>
@@ -141,11 +144,11 @@
 </body>
 <script>
     (function(){
-        var t,i,e,n=window,o=document,a=arguments,s="script",r=["config","track","identify","visit","push","call","trackForm","trackClick"],c=function(){var t,i=this;for(i._e=[],t=0;r.length>t;t++)(function(t){i[t]=function(){return i._e.push([t].concat(Array.prototype.slice.call(arguments,0))),i}})(r[t])};for(n._w=n._w||{},t=0;a.length>t;t++)n._w[a[t]]=n[a[t]]=n[a[t]]||new c;i=o.createElement(s),i.async=1,i.src="//static.woopra.com/js/t/5.js",e=o.getElementsByTagName(s)[0],e.parentNode.insertBefore(i,e)
+	var t,i,e,n=window,o=document,a=arguments,s="script",r=["config","track","identify","visit","push","call","trackForm","trackClick"],c=function(){var t,i=this;for(i._e=[],t=0;r.length>t;t++)(function(t){i[t]=function(){return i._e.push([t].concat(Array.prototype.slice.call(arguments,0))),i}})(r[t])};for(n._w=n._w||{},t=0;a.length>t;t++)n._w[a[t]]=n[a[t]]=n[a[t]]||new c;i=o.createElement(s),i.async=1,i.src="//static.woopra.com/js/t/5.js",e=o.getElementsByTagName(s)[0],e.parentNode.insertBefore(i,e)
     })("woopra");
 
     woopra.config({
-        domain: 'gorilla-repl.org'
+	domain: 'gorilla-repl.org'
     });
     woopra.track();
 </script>
