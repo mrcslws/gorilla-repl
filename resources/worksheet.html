@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="css/output.css"/>
 
     <script type="text/javascript"
-            src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_SVG-full.js&delayStartupUntil=configured"></script>
+	    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_SVG-full.js&delayStartupUntil=configured"></script>
     <script type="text/javascript" src="jslib/marked/marked.min.js"></script>
     <script type="text/javascript" src="jslib/jquery/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="jslib/underscore/underscore.min.js"></script>
@@ -54,7 +54,7 @@
     <script type="text/javascript" src="js/codeDialog.js"></script>
     <script type="text/javascript" src="js/docViewer.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
-
+    
     <title data-bind="text: title">Gorilla REPL</title>
 </head>
 <body>
@@ -70,10 +70,10 @@
 
 <div id="contents">
     <div class="segment container-segment">
-        <div class="container-children">
-        <div data-bind="template: {name: 'segment-template', foreach: worksheet().segments()}">
-        </div>
-        </div>
+	<div class="container-children">
+	<div data-bind="template: {name: 'segment-template', foreach: worksheet().segments()}">
+	</div>
+	</div>
     </div>
 </div>
 <div class="scroll-pad"></div>
@@ -83,59 +83,59 @@
 <script type="text/html" id="palette-template">
     <div class="modal-overlay" data-bind="visible: shown, click: handleOverlayClick"></div>
     <div class="modal" data-bind="visible: shown">
-        <h3 data-bind="text: caption"></h3>
-        <div class="modal-content">
-            <input type="text"
-                   data-bind="hasFocus: focused, value: filterText, valueUpdate: 'input', event: {keydown: handleKeyPress}"/>
-            <div class="palette-items">
-                <ul data-bind="foreach: items">
-                    <li data-bind="click: $parent.handleItemClick, attr: {id: ('palette-item-' + $index())}">
-                        <div class="palette-item"
-                             data-bind="html: desc, css: {highlight: ($index() == $parent.highlight())}">
-                        </div>
-                        <!--<div class="command-shortcut" data-bind="text: kb"></div>-->
-                    </li>
-                </ul>
-            </div>
-        </div>
+	<h3 data-bind="text: caption"></h3>
+	<div class="modal-content">
+	    <input type="text"
+		   data-bind="hasFocus: focused, value: filterText, valueUpdate: 'input', event: {keydown: handleKeyPress}"/>
+	    <div class="palette-items">
+		<ul data-bind="foreach: items">
+		    <li data-bind="click: $parent.handleItemClick, attr: {id: ('palette-item-' + $index())}">
+			<div class="palette-item"
+			     data-bind="html: desc, css: {highlight: ($index() == $parent.highlight())}">
+			</div>
+			<!--<div class="command-shortcut" data-bind="text: kb"></div>-->
+		    </li>
+		</ul>
+	    </div>
+	</div>
     </div>
 </script>
 
 <script type="text/html" id="save-template">
     <div class="modal-overlay" data-bind="visible: shown, click: handleOverlayClick"></div>
     <div class="modal" data-bind="visible: shown">
-        <h3>Filename (relative to project directory):</h3>
-        <div class="modal-content">
-            <input type="text" data-bind="hasFocus: focused, value: filename, valueUpdate: 'input', event: {keydown: handleKeyPress}"/>
-        <div><div class="modal-button" data-bind="click: handleCancelClick">Cancel</div>
-            <div class="modal-button highlight" data-bind="click: handleOKClick">OK</div>
-        </div>
-        </div>
+	<h3>Filename (relative to project directory):</h3>
+	<div class="modal-content">
+	    <input type="text" data-bind="hasFocus: focused, value: filename, valueUpdate: 'input', event: {keydown: handleKeyPress}"/>
+	<div><div class="modal-button" data-bind="click: handleCancelClick">Cancel</div>
+	    <div class="modal-button highlight" data-bind="click: handleOKClick">OK</div>
+	</div>
+	</div>
     </div>
 </script>
 
 <script type="text/html" id="code-dialog-template">
     <div class="modal-overlay" data-bind="visible: shown, click: handleOverlayClick"></div>
     <div class="modal" data-bind="visible: shown">
-        <h3 data-bind="text: caption"></h3>
-        <div class="modal-content">
-            <div class="message" data-bind="html: message"></div>
-            <div class='last-chance'>
-            <textarea class="last-chance"
-                      data-bind="hasFocus: focused, value: contents, event: {keydown: handleKeyPress}"></textarea>
-            </div>
-            <div>
-                <div class="modal-button highlight" data-bind="text: okButtonText, click: handleOKClick"></div>
-            </div>
-        </div>
+	<h3 data-bind="text: caption"></h3>
+	<div class="modal-content">
+	    <div class="message" data-bind="html: message"></div>
+	    <div class='last-chance'>
+	    <textarea class="last-chance"
+		      data-bind="hasFocus: focused, value: contents, event: {keydown: handleKeyPress}"></textarea>
+	    </div>
+	    <div>
+		<div class="modal-button highlight" data-bind="text: okButtonText, click: handleOKClick"></div>
+	    </div>
+	</div>
     </div>
 </script>
 
 <script type="text/html" id="doc-template">
     <div class="doc-viewer" data-bind="visible: shown">
-        <div class="doc-viewer-content">
-            <div data-bind="html: doc"></div>
-        </div>
+	<div class="doc-viewer-content">
+	    <div data-bind="html: doc"></div>
+	</div>
     </div>
 </script>
 
@@ -145,31 +145,31 @@
 
 <script type="text/html" id="code-segment-template">
     <div class="segment code running"
-         data-bind="css: {selected: active(), running: runningIndicator}, attr: {id: id}">
+	 data-bind="css: {selected: active(), running: runningIndicator}, attr: {id: id}">
 
-        <div class="segment-main">
-            <textarea class="codeTextArea mousetrap" data-bind="codemirror: content"></textarea>
-        </div>
-        <div class="error-text" data-bind="text: errorText, visible: errorText() !== ''"></div>
-        <div class="console-text" data-bind="visible: consoleText() !== ''">
-            <pre><code data-bind="html: consoleText"></code></pre>
-        </div>
-        <div class="output"
-             data-bind="visible: (output() != ''), outputViewer: output, segmentID: id">
-            </div>
-        <div class="segment-footer"></div>
+	<div class="segment-main">
+	    <textarea class="codeTextArea mousetrap" data-bind="codemirror: content"></textarea>
+	</div>
+	<div class="error-text" data-bind="text: errorText, visible: errorText() !== ''"></div>
+	<div class="console-text" data-bind="visible: consoleText() !== ''">
+	    <pre><code data-bind="html: consoleText"></code></pre>
+	</div>
+	<div class="output"
+	     data-bind="visible: (output() != ''), outputViewer: output, segmentID: id">
+	    </div>
+	<div class="segment-footer"></div>
     </div>
 </script>
 
 <script type="text/html" id="free-segment-template">
     <div class="segment free" data-bind="css: {selected: active()}, attr: {id: id}, click: handleClick">
-        <div class="segment-main">
-            <div class="free-preview" data-bind="mathJaxViewer: renderedContent, visible: !markupVisible()"></div>
-            <div class="free-markup" data-bind="visible: markupVisible">
-                <textarea data-bind="codemirror: content"></textarea>
-            </div>
-        </div>
-        <div class="segment-footer"></div>
+	<div class="segment-main">
+	    <div class="free-preview" data-bind="mathJaxViewer: renderedContent, visible: !markupVisible()"></div>
+	    <div class="free-markup" data-bind="visible: markupVisible">
+		<textarea data-bind="codemirror: content"></textarea>
+	    </div>
+	</div>
+	<div class="segment-footer"></div>
     </div>
 </script>
 

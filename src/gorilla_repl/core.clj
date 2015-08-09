@@ -6,6 +6,7 @@
   (:use compojure.core)
   (:require [compojure.handler :as handler]
             [compojure.route :as route]
+            [net.cgrand.enlive-html :as html]
             [org.httpkit.server :as server]
             [ring.middleware.keyword-params :as keyword-params]
             [ring.middleware.params :as params]
@@ -65,18 +66,23 @@
 ;; API endpoint for getting webapp configuration information
 (defn config [req] (res/response @conf))
 
+(html/deftemplate worksheet (io/resource "worksheet.html")
+                  [extra-head-html]
+                  [:head] (html/append (html/html-snippet extra-head-html)))
 
 ;; the combined routes - we serve up everything in the "public" directory of resources under "/".
 ;; The REPL traffic is handled in the websocket-transport ns.
-(defroutes app-routes
-           (GET "/load" [] (wrap-api-handler load-worksheet))
-           (POST "/save" [] (wrap-api-handler save))
-           (GET "/gorilla-files" [] (wrap-api-handler gorilla-files))
-           (GET "/config" [] (wrap-api-handler config))
-           (GET "/repl" [] ws-relay/ring-handler)
-           (route/resources "/")
-           (route/files "/project-files" [:root "."]))
-
+(defn app-routes
+  [extra-head-html]
+  (routes
+    (GET "/load" [] (wrap-api-handler load-worksheet))
+    (POST "/save" [] (wrap-api-handler save))
+    (GET "/gorilla-files" [] (wrap-api-handler gorilla-files))
+    (GET "/config" [] (wrap-api-handler config))
+    (GET "/repl" [] ws-relay/ring-handler)
+    (GET "/worksheet.html*" req (worksheet extra-head-html))
+    (route/resources "/")
+    (route/files "/project-files" [:root "."])))
 
 (defn run-gorilla-server
   [conf]
@@ -98,7 +104,9 @@
     ;; first startup nREPL
     (nrepl/start-and-connect nrepl-requested-port)
     ;; and then the webserver
-    (let [s (server/run-server #'app-routes {:port webapp-requested-port :join? false :ip ip})
+    (let [s (server/run-server (app-routes (:extra-head-html conf))
+                               {:port webapp-requested-port :join? false :ip ip
+                                :max-body java.lang.Integer/MAX_VALUE})
           webapp-port (:local-port (meta s))]
       (spit (doto (io/file ".gorilla-port") .deleteOnExit) webapp-port)
       (println (str "Running at http://" ip ":" webapp-port "/worksheet.html ."))
