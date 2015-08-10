@@ -110,7 +110,8 @@
           webapp-port (:local-port (meta s))]
       (spit (doto (io/file ".gorilla-port") .deleteOnExit) webapp-port)
       (println (str "Running at http://" ip ":" webapp-port "/worksheet.html ."))
-      (println "Ctrl+C to exit."))))
+      (println "Ctrl+C to exit.")
+      s)))
 
 (defn -main
   [& args]
