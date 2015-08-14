@@ -15,12 +15,15 @@ var codeSegment = function (contents, consoleText, output) {
     // Segment UI state
     self.active = ko.observable(false);
     self.errorText = ko.observable("");
-    if (consoleText) self.consoleText = ko.observable(consoleText);
-    else self.consoleText = ko.observable("");
-    if (output) self.output = ko.observable(output);
-    else self.output = ko.observable("");
+    self.consoleText = ko.observable(consoleText ? consoleText : "");
+    self.output = ko.observable(output ? output : "");
     self.runningIndicator = ko.observable(false);
 
+    // Save hooks
+    self.saveOutputGetter = ko.observable(function() {
+	return self.output();
+    });
+    
     // The code
     // handle null contents
     if (contents === null) contents = "";
@@ -75,7 +78,7 @@ var codeSegment = function (contents, consoleText, output) {
         var cText = "";
         var oText = "";
         if (self.consoleText() !== "") cText = consoleStart + makeClojureComment(self.consoleText()) + consoleEnd;
-        if (self.output() !== "") oText = outputStart + makeClojureComment(self.output()) + outputEnd;
+        if (self.output() !== "") oText = outputStart + makeClojureComment(self.saveOutputGetter()()) + outputEnd;
         return startTag + self.getContents() + endTag + cText + oText;
     };
 
