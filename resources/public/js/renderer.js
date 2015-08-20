@@ -6,21 +6,24 @@
 
 
 /* Takes a data structure representing the output data and renders it in to the given element. */
-var render = function (data, element, saveOutputGetter, errorCallback) {
-    // Support save hooks
+var render = function (data, element, hooks, errorCallback) {
+    // Support save hooks. Don't give elements direct access to the hooks because sometimes we
+    // need to put functions inside of functions, e.g. for list-likes.
     var setSaveDataFn = function(f) {
-	// Update the save instructions
-	saveOutputGetter(function() {
-	    return JSON.stringify(f());
-	});
+        hooks.getSaveOutput = function() {
+            return JSON.stringify(f());
+        };
     };
+
+    // When the output is cleared, call these functions.
+    hooks.outputWillUnmount = [];
 
     // Some parts of the output might need to run js functions to complete the rendering (like Vega graphs for instance)
     // We maintain a list of those functions that we accumulate as we put together the HTML, and then call them all
     // after the HTML has been inserted into the document.
     var callbackQueue = [];
-    
-    var htmlString = renderPart(data, callbackQueue, errorCallback, setSaveDataFn);
+
+    var htmlString = renderPart(data, callbackQueue, hooks.outputWillUnmount, errorCallback, setSaveDataFn);
     var el = $("<pre>" + htmlString + "</pre>");
     $(element).append(el);
     _.each(callbackQueue, function (callback) {callback()});
@@ -36,13 +39,13 @@ var render = function (data, element, saveOutputGetter, errorCallback) {
 };
 
 
-var renderPart = function (data, callbackQueue, errorCallback, setSaveDataFn) {
-    
+var renderPart = function (data, callbackQueue, cleanupQueue, errorCallback, setSaveDataFn) {
+
     switch (data.type) {
         case "html":
-            return renderHTML(data, callbackQueue, errorCallback, setSaveDataFn);
+            return renderHTML(data, callbackQueue, cleanupQueue, errorCallback, setSaveDataFn);
         case "list-like":
-            return renderListLike(data, callbackQueue, errorCallback, setSaveDataFn);
+            return renderListLike(data, callbackQueue, cleanupQueue, errorCallback, setSaveDataFn);
         case "vega":
             return renderVega(data, callbackQueue, errorCallback);
         case "latex":
@@ -57,47 +60,54 @@ var wrapWithValue = function (data, content) {
     return "<span class='value' data-value='" + _.escape(data.value) + "'>" + content + "</span>";
 };
 
-var renderHTML = function (data, callbackQueue, errorCallback, setSaveDataFn) {
+var renderHTML = function (data, callbackQueue, cleanupQueue, errorCallback, setSaveDataFn) {
     var uuid = UUID.generate();
 
     if (data.didMount) {
-	var didMount = eval(data.didMount);
-	callbackQueue.push(function () {
-	    didMount(document.getElementById(uuid));
-	});
+        var didMount = eval(data.didMount);
+        callbackQueue.push(function () {
+            didMount(document.getElementById(uuid));
+        });
     }
-    
+
     if (data.saveHook) {
-	var saveHook = eval(data.saveHook);
-	setSaveDataFn(function() {
-	    return saveHook(document.getElementById(uuid));
-	});
+        var saveHook = eval(data.saveHook);
+        setSaveDataFn(function() {
+            return saveHook(document.getElementById(uuid));
+        });
     }
-    
+
+    if (data.willUnmount) {
+        var willUnmount = eval(data.willUnmount);
+        cleanupQueue.push(function() {
+            willUnmount(document.getElementById(uuid));
+        });
+    }
+
     return wrapWithValue(data, "<span id='" + uuid + "'>" + data.content + "</span>");
 };
 
-var renderListLike = function (data, callbackQueue, errorCallback, setSaveDataFn) {
+var renderListLike = function (data, callbackQueue, cleanupQueue, errorCallback, setSaveDataFn) {
     var getSaveDataFns = [];
     var wasSet = false;
-    
+
     // first of all render the items
     var renderedItems = data.items.map(function (x) {
-	var getSaveData = function() { return x; };
-	var itemSetSaveDataFn = function(f) { wasSet = true; getSaveData = f; };
-	var r = renderPart(x, callbackQueue, errorCallback, itemSetSaveDataFn);
-	getSaveDataFns.push(getSaveData);
-	return r;
+        var getSaveData = function() { return x; };
+        var itemSetSaveDataFn = function(f) { wasSet = true; getSaveData = f; };
+        var r = renderPart(x, callbackQueue, cleanupQueue, errorCallback, itemSetSaveDataFn);
+        getSaveDataFns.push(getSaveData);
+        return r;
     });
 
     if (wasSet) {
-	setSaveDataFn(function() {
-	    var cloned = JSON.parse(JSON.stringify(data));
-	    cloned.items = getSaveDataFns.map(function (f) { return f(); });
-	    return cloned;
-	});
+        setSaveDataFn(function() {
+            var cloned = JSON.parse(JSON.stringify(data));
+            cloned.items = getSaveDataFns.map(function (f) { return f(); });
+            return cloned;
+        });
     }
-    
+
     // and then assemble the list
     return wrapWithValue(data, data.open + renderedItems.join(data.separator) + data.close);
 };

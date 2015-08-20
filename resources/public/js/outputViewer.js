@@ -15,9 +15,9 @@ ko.bindingHandlers.outputViewer = {
         // get the value to display
         var value = ko.utils.unwrapObservable(valueAccessor()());
 
-	// support save hooks
-	var saveOutputGetter = allBindingsAccessor.get('saveOutputGetter');
-	
+        // prepare to update hooks
+        var hooks = allBindingsAccessor.get('hooks');
+
         // to handle any errors, we need to know the ID of the segment that this output belongs to
         var segID = allBindingsAccessor.get('segmentID');
         // the errorHandler will route error messages to the segment's error div
@@ -29,7 +29,7 @@ ko.bindingHandlers.outputViewer = {
             try {
                 var parsedValue = JSON.parse(value);
                 // The renderer does all of the real work
-                render(parsedValue, element, saveOutputGetter, errorHandler);
+                render(parsedValue, element, hooks, errorHandler);
             } catch (e) {
                 // as a fallback, we display the value directly if we can't parse it as json. This also at least
                 // allows worksheets that pre-date the new renderer to load, even if they look ugly!

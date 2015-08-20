@@ -18,12 +18,9 @@ var codeSegment = function (contents, consoleText, output) {
     self.consoleText = ko.observable(consoleText ? consoleText : "");
     self.output = ko.observable(output ? output : "");
     self.runningIndicator = ko.observable(false);
+    self.hooks = {"getSaveOutput": function() { return self.output();},
+                  "outputWillUnmount": []};
 
-    // Save hooks
-    self.saveOutputGetter = ko.observable(function() {
-	return self.output();
-    });
-    
     // The code
     // handle null contents
     if (contents === null) contents = "";
@@ -46,7 +43,13 @@ var codeSegment = function (contents, consoleText, output) {
         self.consoleText("");
     };
 
+    self.onOutputClear = function () {
+        self.hooks.outputWillUnmount.map(function (fn) {fn();});
+        self.hooks.outputWillUnmount = [];
+    }
+
     self.clearOutput = function () {
+        self.onOutputClear();
         self.output("");
     };
 
@@ -78,7 +81,7 @@ var codeSegment = function (contents, consoleText, output) {
         var cText = "";
         var oText = "";
         if (self.consoleText() !== "") cText = consoleStart + makeClojureComment(self.consoleText()) + consoleEnd;
-        if (self.output() !== "") oText = outputStart + makeClojureComment(self.saveOutputGetter()()) + outputEnd;
+        if (self.output() !== "") oText = outputStart + makeClojureComment(self.hooks.getSaveOutput()) + outputEnd;
         return startTag + self.getContents() + endTag + cText + oText;
     };
 

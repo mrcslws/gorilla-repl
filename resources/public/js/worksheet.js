@@ -57,6 +57,12 @@ var worksheet = function () {
     };
 
     self.deleteSegment = function (index) {
+        var seg = self.segments()[index];
+
+        if (seg.onOutputClear) {
+            seg.onOutputClear();
+        }
+
         self.segments.splice(index, 1);
     };
 
@@ -184,6 +190,10 @@ var worksheet = function () {
             var seg = self.segments()[index];
             // if the segment is already the right type, do nothing.
             if (seg.type == newType) return;
+
+            if (seg.onOutputClear) {
+                seg.onOutputClear();
+            }
 
             var contents = seg.getContents();
             var newSeg = newSegmentConstructor(contents);

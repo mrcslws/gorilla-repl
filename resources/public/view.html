@@ -83,7 +83,7 @@
             <pre><code data-bind="html: consoleText"></code></pre>
         </div>
         <div class="output"
-             data-bind="visible: (output() != ''), outputViewer: output, segmentID: id, saveOutputGetter: saveOutputGetter">
+             data-bind="visible: (output() != ''), outputViewer: output, segmentID: id, hooks: hooks">
         </div>
         <div class="segment-footer"></div>
     </div>
