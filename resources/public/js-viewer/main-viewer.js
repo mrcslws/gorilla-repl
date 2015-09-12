@@ -8,15 +8,18 @@
 var app = function () {
     var self = {};
 
-    self.worksheet = ko.observable();
-    self.filename = ko.observable("");
+    self.worksheet = ko.observable(worksheet());
     self.title = ko.computed(function () {
-        if (self.filename() === "") return "Gorilla REPL viewer";
-        else return "Gorilla REPL viewer: " + self.filename();
+        var content = self.worksheet() &&
+            self.worksheet().titleSegment() &&
+            self.worksheet().titleSegment().renderedContent();
+
+        var el = document.createElement("span");
+        el.innerHTML = content;
+        var h1 = el.getElementsByTagName("h1")[0];
+        return (h1 && h1.textContent) || "Gorilla REPL Viewer";
     });
     self.sourceURL = ko.observable("");
-    self.source = ko.observable("");
-    self.host = ko.observable("");
 
     // The copyBox is a UI element that gives links to the source of the worksheet, and how to copy/edit it.
     self.copyBoxVisible = ko.observable(false);
@@ -27,15 +30,10 @@ var app = function () {
         self.copyBoxVisible(false);
     };
 
-    self.start = function (worksheetData, sourceURL, worksheetName, source) {
+    self.start = function (worksheetData, sourceURL) {
 
-        var ws = worksheet();
-        ws.segments = ko.observableArray(worksheetParser.parse(worksheetData));
-        self.worksheet(ws);
+        self.worksheet().segments(worksheetParser.parse(worksheetData));
         self.sourceURL(sourceURL);
-        self.filename(worksheetName);
-        self.source(source);
-        self.host((source.toLowerCase() === "bitbucket") ? "Bitbucket" : "GitHub");
 
         // wire up the UI
         ko.applyBindings(self, document.getElementById("document"));
@@ -57,6 +55,7 @@ var getParameterByName = function (name) {
 $(function () {
     var viewer = app();
     // how are we getting the worksheet data?
+
     var source = getParameterByName("source");
     switch (source) {
         case "github":
@@ -64,14 +63,14 @@ $(function () {
             var repo = getParameterByName("repo");
             var path = getParameterByName("path");
             getFromGithub(user, repo, path, function (data) {
-                viewer.start(data, "https://github.com/" + user + "/" + repo, path, source);
+                viewer.start(data, "https://github.com/" + user + "/" + repo);
             });
             return;
         case "gist":
             var id = getParameterByName("id");
             var filename = getParameterByName("filename");
             getFromGist(id, filename, function (data) {
-                viewer.start(data,  "https://gist.github.com/" + id, filename, source);
+                viewer.start(data,  "https://gist.github.com/" + id);
             });
             return;
         case "bitbucket":
@@ -80,13 +79,22 @@ $(function () {
             var path = getParameterByName("path");
             var revision = getParameterByName("revision") || "HEAD";
             getFromBitbucket(user, repo, path, revision, function (data) {
-                viewer.start(data, "https://bitbucket.org/" + user + "/" + repo, path, source);
+                viewer.start(data, "https://bitbucket.org/" + user + "/" + repo);
             });
             return;
         case "test":
             // so you can test without exhausting the github API limit
             $.get('/test.clj').success(function (data) {
-                viewer.start(data, "http://gorilla-repl.org/", "test.clj", source);
+                viewer.start(data, source);
             });
+            return;
+        default:
+            // assume the path is a URL
+            var path = getParameterByName("path");
+            if (path) {
+                $.get(path).success(function (data) {
+                    viewer.start(data, path);
+                });
+            }
     }
 });

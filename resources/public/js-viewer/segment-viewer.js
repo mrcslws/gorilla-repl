@@ -21,6 +21,9 @@ var codeSegment = function (contents, consoleText, output) {
     if (output) self.output = ko.observable(output);
     else self.output = ko.observable("");
 
+    self.hooks = {"getSaveOutput": function() { return self.output(); },
+                  "outputWillUnmount": []}
+
     if (contents) self.contents = ko.observable(contents);
     else self.contents = ko.observable("");
 

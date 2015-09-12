@@ -12,5 +12,16 @@ var worksheet = function () {
     // the content of the worksheet is a list of segments.
     self.segments = ko.observableArray();
 
+    self.titleSegment = ko.computed(function () {
+        var segs = self.segments();
+        for (i = 0; i < segs.length; i++) {
+            if (segs[i].type == "free") {
+                return segs[i];
+            }
+        }
+
+        return null;
+    });
+
     return self;
 };
