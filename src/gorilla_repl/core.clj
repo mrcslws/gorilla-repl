@@ -106,7 +106,7 @@
     ;; and then the webserver
     (let [s (server/run-server (app-routes (:extra-head-html conf))
                                {:port webapp-requested-port :join? false :ip ip
-                                :max-body java.lang.Integer/MAX_VALUE})
+                                :max-body 500000000})
           webapp-port (:local-port (meta s))]
       (spit (doto (io/file ".gorilla-port") .deleteOnExit) webapp-port)
       (println (str "Running at http://" ip ":" webapp-port "/worksheet.html ."))
