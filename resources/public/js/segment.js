@@ -18,8 +18,12 @@ var codeSegment = function (contents, consoleText, output) {
     self.consoleText = ko.observable(consoleText ? consoleText : "");
     self.output = ko.observable(output ? output : "");
     self.runningIndicator = ko.observable(false);
-    self.hooks = {"getSaveOutput": function() { return self.output();},
-                  "outputWillUnmount": []};
+
+    function resetHooks () {
+        self.hooks = {"getSaveOutput": function() { return self.output();},
+                      "outputWillUnmount": []};
+    }
+    resetHooks();
 
     // The code
     // handle null contents
@@ -45,7 +49,7 @@ var codeSegment = function (contents, consoleText, output) {
 
     self.onOutputClear = function () {
         self.hooks.outputWillUnmount.map(function (fn) {fn();});
-        self.hooks.outputWillUnmount = [];
+        resetHooks();
     }
 
     self.clearOutput = function () {
