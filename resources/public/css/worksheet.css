@@ -9,8 +9,9 @@ body {
 }
 
 div#contents {
-    margin-left: 10%;
-    margin-right: 10%;
+    max-width: 980px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 h1 {
@@ -71,6 +72,7 @@ div.html-output {
 div.output pre {
     font-family: monospace;
     white-space: pre-wrap;
+    overflow: auto;
 }
 
 div.error-text {

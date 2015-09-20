@@ -6,6 +6,7 @@
 
 pre.static-code {
     margin: 0.3em;
+    overflow: auto;
 }
 
 div.header {
