@@ -47,7 +47,7 @@ var renderPart = function (data, callbackQueue, cleanupQueue, errorCallback, set
         case "list-like":
             return renderListLike(data, callbackQueue, cleanupQueue, errorCallback, setSaveDataFn);
         case "vega":
-            return renderVega(data, callbackQueue, errorCallback, setSaveDataFn);
+            return renderVega(data, callbackQueue, errorCallback);
         case "latex":
             return renderLatex(data, callbackQueue, errorCallback);
     }
@@ -112,7 +112,7 @@ var renderListLike = function (data, callbackQueue, cleanupQueue, errorCallback,
     return wrapWithValue(data, data.open + renderedItems.join(data.separator) + data.close);
 };
 
-var renderVega = function (data, callbackQueue, errorCallback, setSaveDataFn) {
+var renderVega = function (data, callbackQueue, errorCallback) {
 
     var uuid = UUID.generate();
 
@@ -123,52 +123,17 @@ var renderVega = function (data, callbackQueue, errorCallback, setSaveDataFn) {
         errorCallback("Vega error (js): " + msg);
     };
 
-    // For saving. Browsers don't support drawing an SVG to a canvas, so we hack.
-    var imgs = [];
-
     callbackQueue.push(function () {
         vg.parse.spec(data.content, function (chart) {
             try {
                 var element = $("#" + uuid).get()[0];
                 chart({el: element, renderer: 'svg'}).update();
-
-                // We can't wait until save to do this because in some browsers (e.g. Firefox) the
-                // img absorbs the src asynchronously, even for "data:".
-                imgs = Array.prototype.map.call(element.getElementsByTagName("svg"), function(svg) {
-                    var img = document.createElement("img");
-                    img.setAttribute("width", svg.getAttribute("width"));
-                    img.setAttribute("height", svg.getAttribute("height"));
-                    img.src = "data:image/svg+xml," + (new XMLSerializer).serializeToString(svg);
-                    return img;
-                });
             } catch (e) {
                 // we'll end up here if vega throws an error. We try and route this error back to the
                 // segment so the user has an idea of what's going on.
                 errorCallback("Vega error (js): " + e.message);
             }
         });
-    });
-
-    setSaveDataFn(function() {
-        // The raw Vega data can arbitrarily large, while a PNG is predictably medium-sized.
-        // To recap, we:
-        //  1. Draw an SVG in the page
-        //  2. Create a hidden img that contains a copy of the svg
-        //  3. Create a hidden canvas which contains a copy of the img
-        //  4. Export the canvas as a PNG
-        var newContent = imgs.map(function(img) {
-            var cnv = document.createElement("canvas");
-            var w = img.getAttribute("width");
-            var h = img.getAttribute("height");
-            cnv.setAttribute("width", w);
-            cnv.setAttribute("height", h);
-            cnv.getContext("2d").drawImage(img, 0, 0, w, h);
-            return "<img src='" + cnv.toDataURL("image/png") + "' />";
-        }).reduce(function (accumulated, img) {return accumulated + img;}, "");
-        return {
-            'type': 'html',
-            'content': newContent,
-        }
     });
 
     return wrapWithValue(data, "<span class='vega-span' id='" + uuid + "'></span>");
