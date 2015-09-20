@@ -20,6 +20,7 @@ var app = function () {
         return (h1 && h1.textContent) || "Gorilla REPL Viewer";
     });
     self.sourceURL = ko.observable("");
+    self.loading = ko.observable(true);
 
     // The copyBox is a UI element that gives links to the source of the worksheet, and how to copy/edit it.
     self.copyBoxVisible = ko.observable(false);
@@ -41,6 +42,7 @@ var app = function () {
         // we only use CodeMirror to syntax highlight the code in the viewer
         CodeMirror.colorize($("pre.static-code"), "text/x-clojure");
 
+        self.loading(false);
     };
 
     return self;
