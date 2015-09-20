@@ -43,7 +43,7 @@ var freeSegment = function (contents) {
 
     self.renderedContent = ko.computed(function () {
         return marked(self.contents());
-    }).extend({throttle: 250});
+    });
 
     return self;
 };
