@@ -18,7 +18,7 @@ div.header {
     background-color: #eeeeee;
     border-bottom: solid #4682b4;
     border-width: 1px;
-    padding: 0.3em;
+    padding: 0.3em 0;
     font-family: "Arvo", sans-serif;
     font-size: 12px;
     color: #FF29D2;
@@ -31,7 +31,7 @@ div.header a {
 
 div.header-left {
     float: left;
-    padding-left: 0.3em;
+    padding-left: 0.6em;
 }
 
 div.header-right {
