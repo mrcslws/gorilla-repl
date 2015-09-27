@@ -94,8 +94,13 @@ $(function () {
             // assume the path is a URL
             var path = getParameterByName("path");
             if (path) {
-                $.get(path).success(function (data) {
+                var fastPath = path.replace(/\.clj$/, ".faster.clj");
+                $.get(fastPath).success(function (data) {
                     viewer.start(data, path);
+                }).error(function () {
+                    $.get(path).success(function (data) {
+                        viewer.start(data, path);
+                    });
                 });
             }
     }

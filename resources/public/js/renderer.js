@@ -47,7 +47,7 @@ var renderPart = function (data, callbackQueue, cleanupQueue, errorCallback, set
         case "list-like":
             return renderListLike(data, callbackQueue, cleanupQueue, errorCallback, setSaveDataFn);
         case "vega":
-            return renderVega(data, callbackQueue, errorCallback);
+            return renderVega(data, callbackQueue, errorCallback, setSaveDataFn);
         case "latex":
             return renderLatex(data, callbackQueue, errorCallback);
     }
@@ -89,30 +89,30 @@ var renderHTML = function (data, callbackQueue, cleanupQueue, errorCallback, set
 
 var renderListLike = function (data, callbackQueue, cleanupQueue, errorCallback, setSaveDataFn) {
     var getSaveDataFns = [];
-    var wasSet = false;
 
     // first of all render the items
     var renderedItems = data.items.map(function (x) {
-        var getSaveData = function() { return x; };
-        var itemSetSaveDataFn = function(f) { wasSet = true; getSaveData = f; };
+        var getSaveData = function() { var copy = JSON.parse(JSON.stringify(x));
+                                       delete copy["value"];
+                                       return copy; };
+        var itemSetSaveDataFn = function(f) { getSaveData = f; };
         var r = renderPart(x, callbackQueue, cleanupQueue, errorCallback, itemSetSaveDataFn);
         getSaveDataFns.push(getSaveData);
         return r;
     });
 
-    if (wasSet) {
-        setSaveDataFn(function() {
-            var cloned = JSON.parse(JSON.stringify(data));
-            cloned.items = getSaveDataFns.map(function (f) { return f(); });
-            return cloned;
-        });
-    }
+    setSaveDataFn(function() {
+        var cloned = JSON.parse(JSON.stringify(data));
+        cloned.items = getSaveDataFns.map(function (f) { return f(); });
+        delete cloned.value;
+        return cloned;
+    });
 
     // and then assemble the list
     return wrapWithValue(data, data.open + renderedItems.join(data.separator) + data.close);
 };
 
-var renderVega = function (data, callbackQueue, errorCallback) {
+var renderVega = function (data, callbackQueue, errorCallback, setSaveDataFn) {
 
     var uuid = UUID.generate();
 
@@ -134,6 +134,15 @@ var renderVega = function (data, callbackQueue, errorCallback) {
                 errorCallback("Vega error (js): " + e.message);
             }
         });
+    });
+
+    setSaveDataFn(function () {
+        var element = document.getElementById(uuid);
+        return {"type":"html",
+                "content":
+                Array.prototype.map.call(element.getElementsByTagName("svg"), function(svg) {
+                    return svg.outerHTML;
+                }).reduce(function (accumulated, img) {return accumulated + img;}, "")};
     });
 
     return wrapWithValue(data, "<span class='vega-span' id='" + uuid + "'></span>");

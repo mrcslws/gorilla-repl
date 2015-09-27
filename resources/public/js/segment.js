@@ -20,7 +20,9 @@ var codeSegment = function (contents, consoleText, output) {
     self.runningIndicator = ko.observable(false);
 
     function resetHooks () {
-        self.hooks = {"getSaveOutput": function() { return self.output();},
+        self.hooks = {"getSaveOutput": function() { var v = JSON.parse(self.output());
+                                                    delete v["value"];
+                                                    return JSON.stringify(v); },
                       "outputWillUnmount": []};
     }
     resetHooks();
