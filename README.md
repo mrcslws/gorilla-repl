@@ -6,7 +6,7 @@ Gorilla is a rich REPL for Clojure in the notebook style. If you're interested y
 ## This fork
 
 ```
-[com.mrcslws/gorilla-repl "0.3.5-008"]
+[com.mrcslws/gorilla-repl "0.3.5-009"]
 ```
 
 This fork adds capabilities to Gorilla REPL. See commits for more info.
