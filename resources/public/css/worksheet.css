@@ -6,6 +6,7 @@
 
 body {
     /*padding-top: 40px;*/
+    -ms-text-size-adjust:none;
 }
 
 div#contents {
