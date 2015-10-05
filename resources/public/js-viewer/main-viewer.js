@@ -95,13 +95,15 @@ $(function () {
             var path = getParameterByName("path");
             if (path) {
                 var fastPath = path.replace(/\.clj$/, ".faster.clj");
-                $.get(fastPath).success(function (data) {
-                    viewer.start(data, path);
-                }).error(function () {
-                    $.get(path).success(function (data) {
-                        viewer.start(data, path);
-                    });
-                });
+                $.ajax({url: fastPath,
+                        cache: false,
+                        success: (function (data) {
+                            viewer.start(data, path);
+                        }),
+                        error: (function () {
+                            $.get(path).success(function (data) {
+                                viewer.start(data, path);
+                            })})});
             }
     }
 });
