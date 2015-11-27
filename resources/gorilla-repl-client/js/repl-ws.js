@@ -21,8 +21,9 @@ var repl = (function () {
     // TODO: handle errors.
     self.connect = function (successCallback, failureCallback) {
         // hard to believe we have to do this
-        var loc = window.location;
-        var url = "ws://" + loc.hostname + ":" + loc.port + "/repl";
+        var loc = window.location,
+            url = "ws://" + loc.hostname + ":" + loc.port + loc.pathname.replace(/[^/]+$/,'repl');
+
         self.ws = new WebSocket(url);
 
         // we first install a handler that will capture the session id from the clone message. Once it's done its work
@@ -137,8 +138,34 @@ var repl = (function () {
             }
 
             // - error message
+            // If the user code raises an exception we will receive an error message from nREPL. We then use
+            // cider-nrepl's stacktrace middleware to get a processed stacktrace.
             if (d.err) {
-                eventBus.trigger("evaluator:error-response", {error: d.err, segmentID: segID});
+                // The logic here is a little complicated as cider-nrepl will send the stacktrace information back to
+                // us in installments. So what we do is we register a handler for cider replies that accumulates the
+                // information into a single data structure, and when cider-nrepl sends us a done message, indicating
+                // it has finished sending stacktrace information, we fire an event which will cause the worksheet to
+                // render the stacktrace data in the appropriate place.
+                var errorObj = {};
+                errorObj.error = d.err;
+                errorObj.segmentID = segID;
+                // this is very important. The cause field must be present for the renderer to not choke, it is set to
+                // null here, and will be assigned later if the exception does have a cause.
+                errorObj.cause = null;
+                sendCIDERMessage({op: "stacktrace"}, function (ds) {
+                    // once we receive the done message, we can trigger rendering of the error message on the front end.
+                    if (ds.status) {
+                        if (ds.status.indexOf("done") >= 0)
+                            eventBus.trigger("evaluator:error-response", errorObj);
+                    } else {
+                        // if the message doesn't have a status field it will either be describing the exception or the
+                        // cause. It appears that the exception always comes first, and we rely on that behaviour here.
+                        // We only accommodate a single cause. If there is more than one cause message returned then we
+                        // will only use the last returned cause.
+                        if (!errorObj.exception) errorObj.exception = ds;
+                        else errorObj.cause = ds;
+                    }
+                });
                 return;
             }
 

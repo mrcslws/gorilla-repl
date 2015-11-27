@@ -2,6 +2,12 @@
 
 ## Version 0.3.5
 
+- AT LAST: exceptions show stacktraces!
+- Serve resources from less generic location to avoid clashing with project files.
+- Port files are now configurable (thanks to @mattexx).
+- Separate out handlers from embedded HTTPKit to ease embedding (thanks to @deas).
+- Make URLs relative to support easier embedding (thanks to @deas).
+- Viewer properly supports non-ASCII text.
 - Update to support CIDER-nrepl version 0.9.1.
 - Large worksheets (>8MB) now save successfully.
 - Can view worksheets hosted on BitBucket (thanks for @tbrx).

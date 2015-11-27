@@ -14,9 +14,14 @@ var codeSegment = function (contents, consoleText, output) {
 
     // Segment UI state
     self.active = ko.observable(false);
+    // used for renderer errors
     self.errorText = ko.observable("");
-    self.consoleText = ko.observable(consoleText ? consoleText : "");
-    self.output = ko.observable(output ? output : "");
+    // used for Clojure errors
+    self.stackTrace = ko.observable(null);
+    if (consoleText) self.consoleText = ko.observable(consoleText);
+    else self.consoleText = ko.observable("");
+    if (output) self.output = ko.observable(output);
+    else self.output = ko.observable("");
     self.runningIndicator = ko.observable(false);
 
     function resetHooks () {
@@ -46,6 +51,7 @@ var codeSegment = function (contents, consoleText, output) {
 
     self.clearErrorAndConsole = function () {
         self.errorText("");
+        self.stackTrace(null);
         self.consoleText("");
     };
 
